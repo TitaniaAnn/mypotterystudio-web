@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS beta_feedback (
     app_version         VARCHAR(50),
     github_issue_number INT NULL,
     github_issue_url    TEXT NULL,
-    status              ENUM('open','in_progress','closed') DEFAULT 'open',
+    status              ENUM('open','in_progress','paused','closed') DEFAULT 'open',
     votes               INT DEFAULT 0,
     created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES beta_users(id) ON DELETE CASCADE

@@ -8,9 +8,8 @@ $feedback = Database::fetchAll(
     [$user['id']]
 );
 
-$flash = getFlash();
+$hasDownloads = BETA_DOWNLOAD_IOS || BETA_DOWNLOAD_ANDROID;
 
-$hasDownloads = BETA_DOWNLOAD_IOS || BETA_DOWNLOAD_ANDROID || BETA_DOWNLOAD_MAC || BETA_DOWNLOAD_WINDOWS;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -44,7 +43,7 @@ $hasDownloads = BETA_DOWNLOAD_IOS || BETA_DOWNLOAD_ANDROID || BETA_DOWNLOAD_MAC 
             <span class="beta-nav__icon">📝</span>
             Submit Feedback
         </a>
-        <a href="/beta/api/feedback.php" class="beta-nav__item">
+        <a href="/beta/issues.php" class="beta-nav__item">
             <span class="beta-nav__icon">🐛</span>
             All Issues
         </a>
@@ -101,20 +100,6 @@ $hasDownloads = BETA_DOWNLOAD_IOS || BETA_DOWNLOAD_ANDROID || BETA_DOWNLOAD_MAC 
                     <span class="beta-download-card__icon">🤖</span>
                     <span class="beta-download-card__label">Android</span>
                     <span class="beta-download-card__sub">APK</span>
-                </a>
-                <?php endif; ?>
-                <?php if (BETA_DOWNLOAD_MAC): ?>
-                <a href="<?= e(BETA_DOWNLOAD_MAC) ?>" class="beta-download-card">
-                    <span class="beta-download-card__icon">💻</span>
-                    <span class="beta-download-card__label">macOS</span>
-                    <span class="beta-download-card__sub">DMG</span>
-                </a>
-                <?php endif; ?>
-                <?php if (BETA_DOWNLOAD_WINDOWS): ?>
-                <a href="<?= e(BETA_DOWNLOAD_WINDOWS) ?>" class="beta-download-card">
-                    <span class="beta-download-card__icon">🪟</span>
-                    <span class="beta-download-card__label">Windows</span>
-                    <span class="beta-download-card__sub">Installer</span>
                 </a>
                 <?php endif; ?>
             </div>

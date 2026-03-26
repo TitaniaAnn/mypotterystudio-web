@@ -16,10 +16,8 @@ define('ALLOWED_GITHUB_USERS', $_ENV['ALLOWED_GITHUB_USERS'] ?? '');
 
 define('BETA_GITHUB_REPO',  $_ENV['BETA_GITHUB_REPO']  ?? '');
 define('BETA_GITHUB_TOKEN', $_ENV['BETA_GITHUB_TOKEN'] ?? '');
-define('BETA_DOWNLOAD_IOS',     $_ENV['BETA_DOWNLOAD_IOS']     ?? '');
-define('BETA_DOWNLOAD_ANDROID', $_ENV['BETA_DOWNLOAD_ANDROID'] ?? '');
-define('BETA_DOWNLOAD_MAC',     $_ENV['BETA_DOWNLOAD_MAC']     ?? '');
-define('BETA_DOWNLOAD_WINDOWS', $_ENV['BETA_DOWNLOAD_WINDOWS'] ?? '');
+define('BETA_DOWNLOAD_IOS',     $_ENV['BETA_DOWNLOAD_IOS']     ?? getenv('BETA_DOWNLOAD_IOS')     ?: '');
+define('BETA_DOWNLOAD_ANDROID', $_ENV['BETA_DOWNLOAD_ANDROID'] ?? getenv('BETA_DOWNLOAD_ANDROID') ?: '');
 
 define('SESSION_NAME',     'mps_session');
 define('SESSION_LIFETIME', 86400 * 7);

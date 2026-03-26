@@ -7,7 +7,7 @@ if (!file_exists(ROOT_PATH . '/vendor/autoload.php')) {
 require_once ROOT_PATH . '/vendor/autoload.php';
 
 if (file_exists(ROOT_PATH . '/.env')) {
-    $dotenv = Dotenv\Dotenv::createImmutable(ROOT_PATH);
+    $dotenv = Dotenv\Dotenv::createUnsafeImmutable(ROOT_PATH);
     $dotenv->safeLoad();
 }
 

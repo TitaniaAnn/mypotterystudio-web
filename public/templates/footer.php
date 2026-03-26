@@ -20,7 +20,7 @@
             </div>
             <div class="footer__col">
                 <h4 class="footer__col-title">Legal</h4>
-                <a href="/beta/privacy.php" class="footer__link">Privacy Policy</a>
+                <a href="/privacy.php" class="footer__link">Privacy Policy</a>
             </div>
         </div>
     </div>

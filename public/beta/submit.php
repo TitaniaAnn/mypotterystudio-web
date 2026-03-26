@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a href="/beta/submit.php" class="beta-nav__item beta-nav__item--active">
             <span class="beta-nav__icon">📝</span> Submit Feedback
         </a>
-        <a href="/beta/api/feedback.php" class="beta-nav__item">
+        <a href="/beta/issues.php" class="beta-nav__item">
             <span class="beta-nav__icon">🐛</span> All Issues
         </a>
     </nav>

@@ -1,0 +1,28 @@
+# Turn on the rewrite engine
+RewriteEngine On
+RewriteBase /
+
+# 1. Map the root to public/index.php
+RewriteRule ^$ public/index.php [L]
+
+# 2. Map all other requests to the public folder
+# (But only if the request isn't already for the public folder)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ public/$1 [L]
+
+# Deny access to sensitive files
+<FilesMatch "^\.env|composer\.(json|lock)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent directory browsing
+Options -Indexes
+
+# MIME types — required for favicon.ico on some Bluehost configs
+AddType image/x-icon .ico
+AddType image/png .png
+AddType image/svg+xml .svg
+
