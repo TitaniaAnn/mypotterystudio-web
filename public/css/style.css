@@ -187,6 +187,38 @@ ul { list-style: none; }
     font-size: .85rem;
 }
 
+/* Hero — banner layout (single centred column, banner below text) */
+.hero--has-banner .container {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 40px;
+}
+.hero--has-banner .hero__content {
+    max-width: 680px;
+}
+.hero--has-banner .hero__subtitle {
+    margin-left: auto;
+    margin-right: auto;
+}
+.hero--has-banner .hero__ctas {
+    justify-content: center;
+}
+.hero--has-banner .hero__mockup {
+    display: block;
+    width: 100%;
+}
+
+/* Hero Banner Image */
+.hero__banner-img {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.45), 0 4px 20px rgba(0,0,0,.3);
+    display: block;
+}
+
 /* Phone Mockup */
 .hero__mockup { z-index: 1; }
 .hero__phone {
@@ -604,6 +636,7 @@ ul { list-style: none; }
 @media (max-width: 900px) {
     .hero .container { grid-template-columns: 1fr; }
     .hero__mockup { display: none; }
+    .hero--has-banner .hero__mockup { display: block; }
     .features-grid { grid-template-columns: repeat(2, 1fr); }
     .about-strip__inner { grid-template-columns: 1fr; }
     .about-strip__visual { height: 180px; }

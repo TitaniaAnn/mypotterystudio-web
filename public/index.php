@@ -9,6 +9,7 @@ $iosUrl      = setting('ios_url', '');
 $androidUrl  = setting('android_url', '');
 $betaOpen    = setting('beta_open', '1');
 
+$heroBanner  = setting('hero_banner', '');
 $features    = Database::fetchAll("SELECT * FROM app_features WHERE active = 1 ORDER BY sort_order ASC");
 $screenshots = Database::fetchAll("SELECT * FROM screenshots WHERE active = 1 ORDER BY sort_order ASC");
 ?>
@@ -29,40 +30,46 @@ $screenshots = Database::fetchAll("SELECT * FROM screenshots WHERE active = 1 OR
 <?php include __DIR__ . '/templates/nav.php'; ?>
 
 <!-- Hero -->
-<section class="hero" id="home">
+<section class="hero <?= $heroBanner ? 'hero--has-banner' : '' ?>" id="home">
     <div class="hero__bg-pattern"></div>
-    <div class="container hero__content">
-        <div class="hero__badge">
-            <span class="hero__badge-dot"></span>
-            Now in Beta
+    <div class="container">
+        <div class="hero__content">
+            <div class="hero__badge">
+                <span class="hero__badge-dot"></span>
+                Now in Beta
+            </div>
+            <h1 class="hero__title"><?= e($heroTitle) ?></h1>
+            <p class="hero__subtitle"><?= e($heroSub) ?></p>
+            <div class="hero__ctas">
+                <?php if ($iosUrl): ?>
+                    <a href="<?= e($iosUrl) ?>" class="btn btn--primary btn--large">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                        Download on App Store
+                    </a>
+                <?php else: ?>
+                    <a href="#" class="btn btn--primary btn--large btn--disabled" aria-disabled="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                        App Store — Coming Soon
+                    </a>
+                <?php endif; ?>
+                <?php if ($betaOpen): ?>
+                    <a href="/beta/register.php" class="btn btn--outline btn--large">
+                        Join the Beta
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                <?php endif; ?>
+            </div>
+            <div class="hero__scroll-hint">
+                <span>Explore features</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            </div>
         </div>
-        <h1 class="hero__title"><?= e($heroTitle) ?></h1>
-        <p class="hero__subtitle"><?= e($heroSub) ?></p>
-        <div class="hero__ctas">
-            <?php if ($iosUrl): ?>
-                <a href="<?= e($iosUrl) ?>" class="btn btn--primary btn--large">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-                    Download on App Store
-                </a>
-            <?php else: ?>
-                <a href="#" class="btn btn--primary btn--large btn--disabled" aria-disabled="true">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-                    App Store — Coming Soon
-                </a>
-            <?php endif; ?>
-            <?php if ($betaOpen): ?>
-                <a href="/beta/register.php" class="btn btn--outline btn--large">
-                    Join the Beta
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </a>
-            <?php endif; ?>
-        </div>
-        <div class="hero__scroll-hint">
-            <span>Explore features</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-        </div>
-    </div>
-    <div class="hero__mockup">
+        <div class="hero__mockup">
+        <?php if ($heroBanner): ?>
+        <img src="<?= e(UPLOAD_URL . $heroBanner) ?>"
+             alt="<?= e($siteName) ?> app preview"
+             class="hero__banner-img">
+        <?php else: ?>
         <div class="hero__phone">
             <div class="hero__phone-screen">
                 <div class="hero__phone-ui">
@@ -101,7 +108,9 @@ $screenshots = Database::fetchAll("SELECT * FROM screenshots WHERE active = 1 OR
                 </div>
             </div>
         </div>
-    </div>
+        <?php endif; ?>
+        </div><!-- /.hero__mockup -->
+    </div><!-- /.container -->
 </section>
 
 <!-- Features -->

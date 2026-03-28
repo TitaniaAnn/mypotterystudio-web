@@ -43,9 +43,14 @@ function adminNavActive(string $path): string {
         <div class="admin-nav__section">Site</div>
 
         <a href="/admin/settings/index.php"
-            class="admin-nav__item <?= adminNavActive('/admin/settings') ?>">
+            class="admin-nav__item <?= adminNavActive('/admin/settings/index') ?>">
             <span class="admin-nav__icon">⚙️</span>
             App Settings
+        </a>
+        <a href="/admin/settings/screenshots.php"
+            class="admin-nav__item <?= adminNavActive('/admin/settings/screenshots') ?>">
+            <span class="admin-nav__icon">📸</span>
+            Screenshots
         </a>
         <a href="/" target="_blank" class="admin-nav__item">
             <span class="admin-nav__icon">↗</span>

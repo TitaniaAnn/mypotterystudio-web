@@ -106,7 +106,7 @@ $items = Database::fetchAll($sql, $params);
                         <?php foreach ($items as $item): ?>
                         <tr>
                             <td class="admin-table__primary">
-                                <span title="<?= e($item['body']) ?>"><?= e($item['title']) ?></span>
+                                <a href="/admin/beta/feedback_detail.php?id=<?= (int)$item['id'] ?>" class="admin-link"><?= e($item['title']) ?></a>
                             </td>
                             <td>
                                 <span class="admin-badge admin-badge--<?= $item['type'] === 'bug' ? 'red' : 'purple' ?>">

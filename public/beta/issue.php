@@ -3,22 +3,27 @@ require_once __DIR__ . '/../../includes/bootstrap.php';
 BetaAuth::requireLogin();
 
 $user = BetaAuth::getUser();
-
-$feedback = Database::fetchAll(
+$id   = (int)($_GET['id'] ?? 0);
+$item = $id ? Database::fetchOne(
     "SELECT bf.*, bu.name as submitter_name,
         (SELECT 1 FROM beta_votes bv WHERE bv.feedback_id = bf.id AND bv.user_id = ?) as user_voted
      FROM beta_feedback bf
      JOIN beta_users bu ON bf.user_id = bu.id
-     ORDER BY bf.votes DESC, bf.created_at DESC",
-    [$user['id']]
-);
+     WHERE bf.id = ?",
+    [$user['id'], $id]
+) : null;
+
+if (!$item) {
+    header('Location: /beta/issues.php');
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Issues — My Pottery Studio Beta</title>
+    <title><?= e($item['title']) ?> — My Pottery Studio Beta</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Caveat:wght@400;600&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -70,56 +75,41 @@ $feedback = Database::fetchAll(
 <main class="beta-main">
     <header class="beta-topbar">
         <div class="beta-topbar__title">
-            <span class="beta-topbar__script">Community</span>
-            <h1>All Issues</h1>
-        </div>
-        <div class="beta-topbar__actions">
-            <a href="/beta/submit.php" class="beta-btn beta-btn--primary">
-                + Submit Feedback
-            </a>
+            <span class="beta-topbar__script">
+                <a href="/beta/issues.php" class="beta-link" style="font-size:13px;">← All Issues</a>
+            </span>
+            <h1><?= e($item['title']) ?></h1>
         </div>
     </header>
 
     <div class="beta-content">
-        <?php if (empty($feedback)): ?>
-        <div class="beta-empty beta-empty--page">
-            <span class="beta-empty__icon">🏺</span>
-            <h2 class="beta-empty__title">No feedback yet</h2>
-            <p class="beta-empty__text">Be the first to submit a bug report or feature request. Your input helps shape the app!</p>
-            <div class="beta-empty__actions">
-                <a href="/beta/submit.php?type=bug" class="beta-btn beta-btn--primary">Report a Bug</a>
-                <a href="/beta/submit.php?type=feature" class="beta-btn beta-btn--outline">Request a Feature</a>
-            </div>
-        </div>
-        <?php else: ?>
         <section class="beta-section">
-            <div class="beta-feedback-list">
-                <?php foreach ($feedback as $item): ?>
-                <div class="beta-feedback-item">
-                    <div class="beta-feedback-item__meta">
-                        <span class="beta-badge beta-badge--<?= $item['type'] === 'bug' ? 'bug' : 'feature' ?>">
-                            <?= $item['type'] === 'bug' ? '🐛 Bug' : '💡 Feature' ?>
-                        </span>
-                        <span class="beta-badge beta-badge--status beta-badge--<?= e($item['status']) ?>">
-                            <?= e(str_replace('_', ' ', ucfirst($item['status']))) ?>
-                        </span>
-                    </div>
-                    <div class="beta-feedback-item__title">
-                        <a href="/beta/issue.php?id=<?= (int)$item['id'] ?>" class="beta-link"><?= e($item['title']) ?></a>
-                    </div>
-                    <div class="beta-feedback-item__footer">
-                        <span class="beta-feedback-item__votes">▲ <?= (int)$item['votes'] ?></span>
-                        <span class="beta-feedback-item__author">by <?= e($item['submitter_name']) ?></span>
-                        <?php if ($item['github_issue_url']): ?>
-                        <a href="<?= e($item['github_issue_url']) ?>" target="_blank" class="beta-link beta-link--sm">View on GitHub</a>
-                        <?php endif; ?>
-                        <span class="beta-feedback-item__date"><?= date('M j, Y', strtotime($item['created_at'])) ?></span>
-                    </div>
+            <div class="beta-feedback-item" style="cursor:default;">
+                <div class="beta-feedback-item__meta">
+                    <span class="beta-badge beta-badge--<?= $item['type'] === 'bug' ? 'bug' : 'feature' ?>">
+                        <?= $item['type'] === 'bug' ? '🐛 Bug' : '💡 Feature' ?>
+                    </span>
+                    <span class="beta-badge beta-badge--status beta-badge--<?= e($item['status']) ?>">
+                        <?= e(str_replace('_', ' ', ucfirst($item['status']))) ?>
+                    </span>
                 </div>
-                <?php endforeach; ?>
+
+                <div style="margin:16px 0;font-size:14px;line-height:1.7;white-space:pre-wrap;"><?= e($item['body']) ?></div>
+
+                <div class="beta-feedback-item__footer">
+                    <button class="beta-vote-btn <?= $item['user_voted'] ? 'beta-vote-btn--voted' : '' ?>"
+                            data-id="<?= (int)$item['id'] ?>"
+                            data-voted="<?= $item['user_voted'] ? '1' : '0' ?>">
+                        ▲ <span class="vote-count"><?= (int)$item['votes'] ?></span>
+                    </button>
+                    <span class="beta-feedback-item__author">by <?= e($item['submitter_name']) ?></span>
+                    <?php if ($item['github_issue_url']): ?>
+                    <a href="<?= e($item['github_issue_url']) ?>" target="_blank" class="beta-link beta-link--sm">View on GitHub</a>
+                    <?php endif; ?>
+                    <span class="beta-feedback-item__date"><?= date('M j, Y', strtotime($item['created_at'])) ?></span>
+                </div>
             </div>
         </section>
-        <?php endif; ?>
     </div>
 </main>
 
