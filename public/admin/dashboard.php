@@ -140,7 +140,7 @@ $flash = getFlash();
                                 </span>
                             </td>
                             <td>
-                                <span class="admin-badge admin-badge--<?= $item['status'] === 'open' ? 'green' : ($item['status'] === 'in_progress' ? 'yellow' : ($item['status'] === 'paused' ? 'orange' : 'gray')) ?>">
+                                <span class="admin-badge admin-badge--<?= $item['status'] === 'open' ? 'green' : ($item['status'] === 'in_progress' ? 'yellow' : ($item['status'] === 'paused' ? 'orange' : ($item['status'] === 'testing' ? 'blue' : 'gray'))) ?>">
                                     <?= e(ucfirst(str_replace('_',' ',$item['status']))) ?>
                                 </span>
                             </td>

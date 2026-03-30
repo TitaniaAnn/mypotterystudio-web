@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $feedbackId = (int)($_POST['feedback_id'] ?? 0);
     if ($feedbackId && $action === 'status') {
         $newStatus = $_POST['new_status'] ?? '';
-        if (in_array($newStatus, ['open','in_progress','paused','closed'])) {
+        if (in_array($newStatus, ['open','in_progress','paused','testing','closed'])) {
             Database::execute("UPDATE beta_feedback SET status = ? WHERE id = ?", [$newStatus, $feedbackId]);
             $message = 'Status updated.';
         }
@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Filters
 $typeFilter   = in_array($_GET['type'] ?? '', ['bug','feature']) ? $_GET['type'] : '';
-$statusFilter = in_array($_GET['status'] ?? '', ['open','in_progress','paused','closed']) ? $_GET['status'] : '';
+$statusFilter = in_array($_GET['status'] ?? '', ['open','in_progress','paused','testing','closed']) ? $_GET['status'] : '';
 
 $sql    = "SELECT bf.*, bu.name as submitter_name FROM beta_feedback bf JOIN beta_users bu ON bf.user_id = bu.id WHERE 1=1";
 $params = [];
@@ -69,6 +69,7 @@ $items = Database::fetchAll($sql, $params);
                     <option value="open"        <?= $statusFilter === 'open'        ? 'selected' : '' ?>>Open</option>
                     <option value="in_progress" <?= $statusFilter === 'in_progress' ? 'selected' : '' ?>>In Progress</option>
                     <option value="paused"      <?= $statusFilter === 'paused'      ? 'selected' : '' ?>>Paused</option>
+                    <option value="testing"     <?= $statusFilter === 'testing'     ? 'selected' : '' ?>>Testing</option>
                     <option value="closed"      <?= $statusFilter === 'closed'      ? 'selected' : '' ?>>Closed</option>
                 </select>
             </div>
@@ -114,7 +115,7 @@ $items = Database::fetchAll($sql, $params);
                                 </span>
                             </td>
                             <td>
-                                <span class="admin-badge admin-badge--<?= $item['status'] === 'open' ? 'green' : ($item['status'] === 'in_progress' ? 'yellow' : ($item['status'] === 'paused' ? 'orange' : 'gray')) ?>">
+                                <span class="admin-badge admin-badge--<?= $item['status'] === 'open' ? 'green' : ($item['status'] === 'in_progress' ? 'yellow' : ($item['status'] === 'paused' ? 'orange' : ($item['status'] === 'testing' ? 'blue' : 'gray'))) ?>">
                                     <?= e(ucfirst(str_replace('_',' ',$item['status']))) ?>
                                 </span>
                             </td>
@@ -137,6 +138,7 @@ $items = Database::fetchAll($sql, $params);
                                         <option value="open"        <?= $item['status'] === 'open'        ? 'selected' : '' ?>>Open</option>
                                         <option value="in_progress" <?= $item['status'] === 'in_progress' ? 'selected' : '' ?>>In Progress</option>
                                         <option value="paused"      <?= $item['status'] === 'paused'      ? 'selected' : '' ?>>Paused</option>
+                                        <option value="testing"     <?= $item['status'] === 'testing'     ? 'selected' : '' ?>>Testing</option>
                                         <option value="closed"      <?= $item['status'] === 'closed'      ? 'selected' : '' ?>>Closed</option>
                                     </select>
                                 </form>

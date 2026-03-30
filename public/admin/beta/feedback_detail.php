@@ -22,7 +22,7 @@ $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action    = $_POST['action'] ?? '';
     $newStatus = $_POST['new_status'] ?? '';
-    if ($action === 'status' && in_array($newStatus, ['open','in_progress','paused','closed'])) {
+    if ($action === 'status' && in_array($newStatus, ['open','in_progress','paused','testing','closed'])) {
         Database::execute("UPDATE beta_feedback SET status = ? WHERE id = ?", [$newStatus, $id]);
         $item['status'] = $newStatus;
         $message = 'Status updated.';
@@ -67,7 +67,7 @@ $pageTitle = 'Feedback: ' . $item['title'];
                     <span class="admin-badge admin-badge--<?= $item['type'] === 'bug' ? 'red' : 'purple' ?>">
                         <?= $item['type'] === 'bug' ? '🐛 Bug' : '💡 Feature' ?>
                     </span>
-                    <span class="admin-badge admin-badge--<?= $item['status'] === 'open' ? 'green' : ($item['status'] === 'in_progress' ? 'yellow' : ($item['status'] === 'paused' ? 'orange' : 'gray')) ?>">
+                    <span class="admin-badge admin-badge--<?= $item['status'] === 'open' ? 'green' : ($item['status'] === 'in_progress' ? 'yellow' : ($item['status'] === 'paused' ? 'orange' : ($item['status'] === 'testing' ? 'blue' : 'gray'))) ?>">
                         <?= e(ucfirst(str_replace('_', ' ', $item['status']))) ?>
                     </span>
                     <span style="font-size:13px;color:var(--admin-text-lt);">
@@ -104,6 +104,7 @@ $pageTitle = 'Feedback: ' . $item['title'];
                             <option value="open"        <?= $item['status'] === 'open'        ? 'selected' : '' ?>>Open</option>
                             <option value="in_progress" <?= $item['status'] === 'in_progress' ? 'selected' : '' ?>>In Progress</option>
                             <option value="paused"      <?= $item['status'] === 'paused'      ? 'selected' : '' ?>>Paused</option>
+                            <option value="testing"     <?= $item['status'] === 'testing'     ? 'selected' : '' ?>>Testing</option>
                             <option value="closed"      <?= $item['status'] === 'closed'      ? 'selected' : '' ?>>Closed</option>
                         </select>
                         <button type="submit" class="admin-btn admin-btn--primary">Update</button>
