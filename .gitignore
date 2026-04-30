@@ -1,0 +1,28 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+.htaccess
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+MyPotteryStudio-Web.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependencies
+/vendor/
+/node_modules/
+
+# Logs
+*.log
+
+# Temporary files
+/tmp/
+/temp/
