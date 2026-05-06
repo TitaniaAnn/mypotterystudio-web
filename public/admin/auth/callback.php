@@ -16,13 +16,9 @@ if (!$code || !$state) {
     redirect(SITE_URL . '/admin/login.php?error=auth_failed');
 }
 
-if (!Auth::handleGitHubCallback($code, $state)) {
-    // Determine specific error type
-    $error = 'auth_failed';
-    if ($state !== ($_SESSION['oauth_state'] ?? '')) {
-        $error = 'state_mismatch';
-    }
-    redirect(SITE_URL . '/admin/login.php?error=' . $error);
+$result = Auth::handleGitHubCallback($code, $state);
+if ($result !== 'ok') {
+    redirect(SITE_URL . '/admin/login.php?error=' . $result);
 }
 
 redirect(SITE_URL . '/admin/dashboard.php');

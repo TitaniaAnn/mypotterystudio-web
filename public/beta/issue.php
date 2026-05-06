@@ -23,6 +23,7 @@ if (!$item) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
     <title><?= e($item['title']) ?> — My Pottery Studio Beta</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -98,9 +99,8 @@ if (!$item) {
 
                 <div class="beta-feedback-item__footer">
                     <button class="beta-vote-btn <?= $item['user_voted'] ? 'beta-vote-btn--voted' : '' ?>"
-                            data-id="<?= (int)$item['id'] ?>"
-                            data-voted="<?= $item['user_voted'] ? '1' : '0' ?>">
-                        ▲ <span class="vote-count"><?= (int)$item['votes'] ?></span>
+                            data-vote="<?= (int)$item['id'] ?>">
+                        ▲ <span class="vote-count" data-vote-count><?= (int)$item['votes'] ?></span>
                     </button>
                     <span class="beta-feedback-item__author">by <?= e($item['submitter_name']) ?></span>
                     <?php if ($item['github_issue_url']): ?>

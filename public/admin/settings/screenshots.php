@@ -43,6 +43,9 @@ function deleteUploadedFile(string $relativePath): void {
 // ── Handle POST ─────────────────────────────────────────────────────────────
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Reorder is JSON-ish; everything else is HTML form. Use JSON response
+    // for reorder so the AJAX path gets a structured 403 instead of HTML.
+    verify_csrf(($_POST['action'] ?? '') === 'reorder');
     $action = $_POST['action'] ?? '';
 
     // Upload / replace banner
@@ -290,6 +293,7 @@ $flash       = getFlash();
                 <?php endif; ?>
 
                 <form method="POST" enctype="multipart/form-data" id="bannerForm">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="upload_banner">
                     <div class="sc-upload-zone" id="bannerZone">
                         <span class="sc-upload-zone__icon">🖼️</span>
@@ -315,6 +319,7 @@ $flash       = getFlash();
                 </form>
                 <?php if ($heroBanner): ?>
                 <form method="POST" id="removeBannerForm">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="remove_banner">
                 </form>
                 <?php endif; ?>
@@ -334,6 +339,7 @@ $flash       = getFlash();
                 <h3 style="font-size:14px;font-weight:700;margin-bottom:14px;">Add Screenshot</h3>
                 <form method="POST" enctype="multipart/form-data" id="screenshotForm"
                       style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="add_screenshot">
 
                     <div>
@@ -396,6 +402,7 @@ $flash       = getFlash();
                             </div>
                             <div class="sc-item__actions">
                                 <form method="POST" style="flex:1">
+                                    <?= csrf_field() ?>
                                     <input type="hidden" name="action" value="toggle">
                                     <input type="hidden" name="id" value="<?= (int)$shot['id'] ?>">
                                     <button type="submit" class="sc-item__btn" style="width:100%">
@@ -403,6 +410,7 @@ $flash       = getFlash();
                                     </button>
                                 </form>
                                 <form method="POST" style="flex:1">
+                                    <?= csrf_field() ?>
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id" value="<?= (int)$shot['id'] ?>">
                                     <button type="submit" class="sc-item__btn sc-item__btn--danger"
@@ -424,6 +432,7 @@ $flash       = getFlash();
 </div>
 
 <script src="/admin/js/admin.js"></script>
+<script>window.__csrfToken = <?= json_encode(csrf_token()) ?>;</script>
 <script>
 // ── Upload zone file-name feedback ──────────────────────────────────────────
 function wireUploadZone(inputId, filenameId, submitId) {
@@ -506,6 +515,7 @@ wireUploadZone('screenshot_image', 'shotFilename',   'shotSubmit');
         const ids = [...grid.querySelectorAll('.sc-item')].map(el => el.dataset.id);
         const body = new URLSearchParams();
         body.append('action', 'reorder');
+        body.append('_csrf', window.__csrfToken || '');
         ids.forEach((id, i) => body.append('order[' + i + ']', id));
         fetch('', { method: 'POST', body });
     }

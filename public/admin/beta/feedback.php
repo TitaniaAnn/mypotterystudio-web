@@ -7,6 +7,7 @@ $message   = '';
 
 // Handle status change
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     $action     = $_POST['action'] ?? '';
     $feedbackId = (int)($_POST['feedback_id'] ?? 0);
     if ($feedbackId && $action === 'status') {
@@ -131,6 +132,7 @@ $items = Database::fetchAll($sql, $params);
                             <td><?= date('M j, Y', strtotime($item['created_at'])) ?></td>
                             <td>
                                 <form method="POST" class="admin-inline-form">
+                                    <?= csrf_field() ?>
                                     <input type="hidden" name="action" value="status">
                                     <input type="hidden" name="feedback_id" value="<?= $item['id'] ?>">
                                     <select name="new_status" class="admin-filter-select admin-filter-select--sm"

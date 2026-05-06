@@ -9,7 +9,8 @@ if (!BETA_GITHUB_REPO) {
     exit;
 }
 
-$state  = in_array($_GET['state'] ?? 'all', ['open','closed','all']) ? $_GET['state'] : 'all';
-$issues = GitHubAPI::getIssues(BETA_GITHUB_REPO, $state, BETA_GITHUB_TOKEN);
+$requestedState = $_GET['state'] ?? 'all';
+$state          = in_array($requestedState, ['open','closed','all'], true) ? $requestedState : 'all';
+$issues         = GitHubAPI::getIssues(BETA_GITHUB_REPO, $state, BETA_GITHUB_TOKEN);
 
 echo json_encode(['success' => true, 'data' => $issues]);

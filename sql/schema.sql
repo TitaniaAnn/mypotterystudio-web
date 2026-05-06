@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS beta_users (
     password_hash VARCHAR(255) NOT NULL,
     name          VARCHAR(255) NOT NULL,
     platform      ENUM('android','ios','both','other') NOT NULL DEFAULT 'other',
-    approved      TINYINT(1) DEFAULT 1,
+    approved      TINYINT(1) DEFAULT 0,
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login    TIMESTAMP NULL
 ) ENGINE=InnoDB;
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS beta_feedback (
     app_version         VARCHAR(50),
     github_issue_number INT NULL,
     github_issue_url    TEXT NULL,
-    status              ENUM('open','in_progress','closed') DEFAULT 'open',
+    status              ENUM('open','in_progress','paused','testing','closed') DEFAULT 'open',
     votes               INT DEFAULT 0,
     created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES beta_users(id) ON DELETE CASCADE
@@ -100,4 +100,19 @@ CREATE TABLE IF NOT EXISTS beta_emails (
     body       TEXT NOT NULL,
     sent_to    INT DEFAULT 0,
     sent_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    filename   VARCHAR(255) PRIMARY KEY,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    email       VARCHAR(255) NOT NULL,
+    ip          VARCHAR(45),
+    successful  TINYINT(1) DEFAULT 0,
+    attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_email_time (email, attempted_at),
+    INDEX idx_ip_time    (ip, attempted_at)
 ) ENGINE=InnoDB;

@@ -2,5 +2,16 @@
   "require": {
     "vlucas/phpdotenv": "^5.6",
     "phpmailer/phpmailer": "^6.9"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.5"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "MyPotteryStudio\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit"
   }
 }

@@ -47,4 +47,22 @@ class Database {
         $stmt->execute(array_merge($data, $whereParams));
         return $stmt->rowCount();
     }
+
+    public static function transaction(callable $fn) {
+        $pdo = self::connect();
+        $pdo->beginTransaction();
+        try {
+            $result = $fn($pdo);
+            $pdo->commit();
+            return $result;
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            throw $e;
+        }
+    }
+
+    /** Test seam: inject a custom PDO (used by the test suite). */
+    public static function setPdo(?PDO $pdo): void {
+        self::$pdo = $pdo;
+    }
 }

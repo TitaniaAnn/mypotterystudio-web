@@ -20,7 +20,7 @@ require_once __DIR__ . '/../../includes/bootstrap.php';
             <span class="beta-auth-logo__text">My Pottery Studio</span>
         </a>
         <h1 class="beta-auth-title">Privacy Policy</h1>
-        <p class="beta-auth-sub">Last updated: <?= date('F j, Y') ?></p>
+        <p class="beta-auth-sub">Last updated: March 17, 2026</p>
 
         <div class="beta-prose">
             <h2>1. Information We Collect</h2>

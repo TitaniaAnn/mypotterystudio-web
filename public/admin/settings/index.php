@@ -32,6 +32,7 @@ $settingFields = [
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     foreach ($_POST['settings'] ?? [] as $key => $value) {
         $key   = preg_replace('/[^a-z0-9_]/', '', $key);
         $value = trim($value);
@@ -78,6 +79,7 @@ $flash = getFlash();
         <?php endif; ?>
 
         <form method="POST" class="admin-form admin-settings-form">
+            <?= csrf_field() ?>
             <?php foreach ($settingFields as $groupName => $fields): ?>
             <div class="admin-section">
                 <h2 class="admin-section__title"><?= e($groupName) ?></h2>

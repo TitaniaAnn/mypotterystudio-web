@@ -8,6 +8,7 @@ $msgType   = 'success';
 
 // Handle POST actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     $action = $_POST['action'] ?? '';
     $userId = (int)($_POST['user_id'] ?? 0);
 
@@ -103,18 +104,21 @@ $flash = getFlash();
                                 <div class="admin-row-actions">
                                     <?php if (!$tester['approved']): ?>
                                     <form method="POST" style="display:inline;">
+                                        <?= csrf_field() ?>
                                         <input type="hidden" name="action" value="approve">
                                         <input type="hidden" name="user_id" value="<?= $tester['id'] ?>">
                                         <button type="submit" class="admin-btn-sm admin-btn-sm--green">Approve</button>
                                     </form>
                                     <?php else: ?>
                                     <form method="POST" style="display:inline;">
+                                        <?= csrf_field() ?>
                                         <input type="hidden" name="action" value="revoke">
                                         <input type="hidden" name="user_id" value="<?= $tester['id'] ?>">
                                         <button type="submit" class="admin-btn-sm admin-btn-sm--yellow">Revoke</button>
                                     </form>
                                     <?php endif; ?>
                                     <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this tester? This cannot be undone.');">
+                                        <?= csrf_field() ?>
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="user_id" value="<?= $tester['id'] ?>">
                                         <button type="submit" class="admin-btn-sm admin-btn-sm--red">Delete</button>

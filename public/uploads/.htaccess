@@ -1,0 +1,29 @@
+# Defence-in-depth: never execute PHP/script files in the uploads tree.
+# mime_content_type validation in handleImageUpload() should already block
+# non-image uploads, but this prevents any future hosting misconfiguration
+# from running an attacker-uploaded payload.
+
+<FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh|asp|aspx|jsp)$">
+    Require all denied
+</FilesMatch>
+
+# Older Apache compatibility (mod_authz_host pre-2.4)
+<IfModule !mod_authz_core.c>
+    <FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh|asp|aspx|jsp)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
+# Disable PHP handler entirely if SetHandler is available.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+Options -ExecCGI

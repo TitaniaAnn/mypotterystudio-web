@@ -7,6 +7,7 @@ $message   = '';
 $msgType   = 'success';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     $subject  = trim($_POST['subject'] ?? '');
     $body     = trim($_POST['body'] ?? '');
     $platform = $_POST['platform'] ?? 'all';
@@ -91,6 +92,7 @@ $totalApproved = (int)(Database::fetchOne("SELECT COUNT(*) as c FROM beta_users 
                         ℹ️ Emails are logged in the database. Actual sending requires configuring SMTP settings in your <code>.env</code> file and uncommenting the PHPMailer code in this file.
                     </div>
                     <form method="POST" class="admin-form">
+                        <?= csrf_field() ?>
                         <div class="admin-form__group">
                             <label class="admin-form__label">Send To</label>
                             <select name="platform" class="admin-form__input admin-form__select">

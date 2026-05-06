@@ -33,6 +33,13 @@ class Auth {
     public static function logout(): void {
         self::start();
         $_SESSION = [];
+        if (ini_get('session.use_cookies')) {
+            $p = session_get_cookie_params();
+            setcookie(
+                session_name(), '', time() - 42000,
+                $p['path'], $p['domain'], $p['secure'], $p['httponly']
+            );
+        }
         session_destroy();
     }
 
@@ -47,8 +54,15 @@ class Auth {
         ]);
     }
 
-    public static function handleGitHubCallback(string $code, string $state): bool {
-        if ($state !== ($_SESSION['oauth_state'] ?? '')) return false;
+    /**
+     * Handles the GitHub OAuth callback. Returns one of:
+     *   'ok'              — login successful
+     *   'state_mismatch'  — CSRF state did not match
+     *   'not_allowed'     — user is not in the GitHub allowlist
+     *   'auth_failed'     — token exchange or user fetch failed
+     */
+    public static function handleGitHubCallback(string $code, string $state): string {
+        if ($state !== ($_SESSION['oauth_state'] ?? '')) return 'state_mismatch';
         unset($_SESSION['oauth_state']);
 
         $tokenData = self::httpPost('https://github.com/login/oauth/access_token', [
@@ -58,17 +72,17 @@ class Auth {
             'redirect_uri'  => GITHUB_REDIRECT_URI,
         ], ['Accept: application/json']);
 
-        if (empty($tokenData['access_token'])) return false;
+        if (empty($tokenData['access_token'])) return 'auth_failed';
 
         $githubUser = self::httpGet('https://api.github.com/user', $tokenData['access_token']);
-        if (empty($githubUser['login'])) return false;
+        if (empty($githubUser['login'])) return 'auth_failed';
 
-        return self::loginUser($githubUser);
+        return self::loginUser($githubUser) ? 'ok' : 'not_allowed';
     }
 
     private static function loginUser(array $githubUser): bool {
-        $allowed = array_map('trim', explode(',', ALLOWED_GITHUB_USERS));
-        if (!in_array($githubUser['login'], $allowed)) return false;
+        $allowed = array_filter(array_map('trim', explode(',', ALLOWED_GITHUB_USERS)));
+        if (!in_array($githubUser['login'], $allowed, true)) return false;
 
         $existing = Database::fetchOne("SELECT id FROM admin_users WHERE github_id = ?", [$githubUser['id']]);
         $name   = $githubUser['name'] ?? $githubUser['login'];
@@ -88,6 +102,9 @@ class Auth {
         }
 
         self::start();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
         $_SESSION['admin_id']   = $userId;
         $_SESSION['admin_user'] = [
             'id' => $userId, 'login' => $githubUser['login'],

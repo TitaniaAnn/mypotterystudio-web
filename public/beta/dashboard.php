@@ -9,7 +9,7 @@ $feedback = Database::fetchAll(
 );
 
 $hasDownloads = BETA_DOWNLOAD_IOS || BETA_DOWNLOAD_ANDROID;
-
+$flash         = getFlash();
 ?>
 <!DOCTYPE html>
 <html lang="en">

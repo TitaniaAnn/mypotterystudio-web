@@ -9,10 +9,15 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email    = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
-    if (BetaAuth::login($email, $password)) {
-        redirect(SITE_URL . '/beta/dashboard.php');
-    } else {
-        $error = 'Invalid email or password, or your account has not been approved.';
+    $ip       = $_SERVER['REMOTE_ADDR'] ?? null;
+    switch (BetaAuth::attemptLogin($email, $password, $ip)) {
+        case 'ok':
+            redirect(SITE_URL . '/beta/dashboard.php');
+        case 'rate_limited':
+            $error = 'Too many failed attempts. Please try again in 15 minutes.';
+            break;
+        default:
+            $error = 'Invalid email or password, or your account has not been approved.';
     }
 }
 

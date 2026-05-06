@@ -9,6 +9,7 @@ $success = false;
 $defaultType = in_array($_GET['type'] ?? '', ['bug','feature']) ? $_GET['type'] : 'bug';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     $type       = in_array($_POST['type'] ?? '', ['bug','feature']) ? $_POST['type'] : '';
     $title      = trim($_POST['title'] ?? '');
     $body       = trim($_POST['body'] ?? '');
@@ -120,6 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="beta-card beta-card--form">
             <form method="POST" class="beta-form">
+                <?= csrf_field() ?>
                 <!-- Type tabs -->
                 <div class="beta-form__group">
                     <label class="beta-form__label">Feedback Type</label>

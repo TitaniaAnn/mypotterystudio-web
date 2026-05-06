@@ -52,6 +52,11 @@ function adminNavActive(string $path): string {
             <span class="admin-nav__icon">📸</span>
             Screenshots
         </a>
+        <a href="/admin/settings/migrations.php"
+            class="admin-nav__item <?= adminNavActive('/admin/settings/migrations') ?>">
+            <span class="admin-nav__icon">🗄️</span>
+            Migrations
+        </a>
         <a href="/" target="_blank" class="admin-nav__item">
             <span class="admin-nav__icon">↗</span>
             View Site

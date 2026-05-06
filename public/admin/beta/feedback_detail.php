@@ -20,6 +20,7 @@ $message = '';
 
 // Handle status change
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     $action    = $_POST['action'] ?? '';
     $newStatus = $_POST['new_status'] ?? '';
     if ($action === 'status' && in_array($newStatus, ['open','in_progress','paused','testing','closed'])) {
@@ -99,6 +100,7 @@ $pageTitle = 'Feedback: ' . $item['title'];
                 <div>
                     <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--admin-text-lt);margin-bottom:8px;">Change Status</div>
                     <form method="POST" style="display:flex;gap:10px;align-items:center;">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="action" value="status">
                         <select name="new_status" class="admin-filter-select">
                             <option value="open"        <?= $item['status'] === 'open'        ? 'selected' : '' ?>>Open</option>

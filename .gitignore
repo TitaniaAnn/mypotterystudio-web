@@ -2,7 +2,9 @@
 .env
 .env.local
 .env.*.local
-.htaccess
+
+# Root .htaccess only — keep nested ones (e.g. public/uploads/.htaccess)
+/.htaccess
 
 # IDE
 .vscode/
@@ -26,3 +28,10 @@ Thumbs.db
 # Temporary files
 /tmp/
 /temp/
+
+# PHPUnit cache
+/.phpunit.cache/
+
+# User-uploaded media (keep the .htaccess script-execution guard)
+public/uploads/*
+!public/uploads/.htaccess

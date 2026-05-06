@@ -9,6 +9,7 @@ $errors  = [];
 $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     $name     = trim($_POST['name'] ?? '');
     $email    = strtolower(trim($_POST['email'] ?? ''));
     $password = $_POST['password'] ?? '';
@@ -33,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'password_hash' => password_hash($password, PASSWORD_DEFAULT),
                 'name'          => $name,
                 'platform'      => $platform,
-                'approved'      => 1,
+                'approved'      => 0,
             ]);
             $success = true;
         }
@@ -63,8 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <?php if ($success): ?>
         <div class="beta-alert beta-alert--success">
-            <strong>You're in!</strong> Your account has been created. You can now
-            <a href="/beta/login.php" class="beta-link">sign in to the beta portal</a>.
+            <strong>Application received.</strong> Your account is pending approval.
+            You'll be able to sign in once an admin reviews and approves it.
         </div>
         <?php else: ?>
 
@@ -79,6 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="POST" class="beta-form">
+            <?= csrf_field() ?>
             <div class="beta-form__row">
                 <div class="beta-form__group">
                     <label class="beta-form__label" for="name">Full Name</label>

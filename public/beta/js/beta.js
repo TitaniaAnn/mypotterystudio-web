@@ -6,6 +6,9 @@
     'use strict';
 
     // ---- Vote buttons ----
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfMeta ? csrfMeta.content : '';
+
     document.querySelectorAll('[data-vote]').forEach(function (btn) {
         btn.addEventListener('click', function () {
             const feedbackId = this.dataset.vote;
@@ -14,7 +17,10 @@
 
             fetch('/beta/api/vote.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken,
+                },
                 body: JSON.stringify({ feedback_id: parseInt(feedbackId, 10) }),
             })
             .then(function (r) { return r.json(); })
@@ -22,7 +28,7 @@
                 if (data.success) {
                     const countEl = el.querySelector('[data-vote-count]');
                     if (countEl) countEl.textContent = data.votes;
-                    el.classList.toggle('voted', data.voted);
+                    el.classList.toggle('beta-vote-btn--voted', data.voted);
                     el.setAttribute('title', data.voted ? 'Remove vote' : 'Vote for this');
                 }
             })
