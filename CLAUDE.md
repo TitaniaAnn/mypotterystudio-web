@@ -8,14 +8,17 @@ Marketing site + beta-testing portal for the **My Pottery Studio** mobile app. P
 
 ## Setup & common commands
 
-There is no test suite, build step, or linter wired up. Workflow is edit → upload → reload.
+No build step or linter. Workflow is edit → upload → reload.
 
 ```bash
-composer install           # one-time: pulls phpmailer + phpdotenv into vendor/
-cp .env.example .env       # then fill in DB + GitHub OAuth + SMTP creds
-mysql -u USER -p DB < sql/schema.sql   # provision schema (idempotent — uses IF NOT EXISTS / ON DUPLICATE KEY)
+composer install                       # runtime + dev (PHPUnit) deps
+cp .env.example .env                   # fill in DB + GitHub OAuth + SMTP creds
+mysql -u USER -p DB < sql/schema.sql   # fresh install (idempotent: IF NOT EXISTS / ON DUPLICATE KEY)
 php -S localhost:8000 -t public        # local dev (bypasses .htaccess; routes work because public/ is the docroot)
+composer test                          # PHPUnit suite (=> ./vendor/bin/phpunit)
 ```
+
+DB tests run against in-memory SQLite via `Database::setPdo()`. They auto-skip if `pdo_sqlite` is not loaded — see `tests/README.md` for the one-line enable. After the first install, schema changes can be applied via `/admin/settings/migrations.php` (no shell access required).
 
 For production-like local testing of the `.htaccess` rewrite (root → `public/index.php`), use Apache rather than `php -S`.
 
@@ -60,19 +63,24 @@ Both share the single PHP session (`SESSION_NAME = mps_session`), so a user can 
 
 When a beta tester submits feedback via [public/beta/submit.php](public/beta/submit.php), it's optionally cross-posted to the configured `BETA_GITHUB_REPO` as a GitHub issue (using `BETA_GITHUB_TOKEN`), and the resulting issue number/URL is stored on the `beta_feedback` row. The "All Issues" page in the beta portal pulls live issues from the GitHub API via [`GitHubAPI::getIssues`](includes/GitHubAPI.php).
 
-**Footgun:** there are TWO `GitHubAPI` classes — [includes/GitHubAPI.php](includes/GitHubAPI.php) (the one bootstrap loads) and [config/GitHubAPI.php](config/GitHubAPI.php) (a richer copy with `getIssue`/`updateIssue` and `CURLOPT_SSL_VERIFYPEER => false`, NOT autoloaded). When adding methods, edit the `includes/` version and remove or merge the orphan in `config/` rather than adding a third copy.
+### Outbound email
 
-### Schema
+Admin "Send Email" at [public/admin/beta/email.php](public/admin/beta/email.php) sends via SMTP using PHPMailer. SMTP creds come from the `MAIL_*` env vars (host, port, encryption `tls`/`ssl`, user, pass, from, optional reply-to). The handler keeps one SMTP connection alive across the recipient loop (`SMTPKeepAlive = true`) and clears the addressee between sends so each tester only sees their own email. Per-recipient failures are caught, logged via `error_log()`, and counted into the on-screen summary. Successful send count is recorded in `beta_emails.sent_to`; failures are not recorded in the DB (only the log).
 
-Single source of truth: [sql/schema.sql](sql/schema.sql). Tables: `admin_users`, `settings` (key/value), `app_features`, `screenshots`, `beta_users`, `beta_feedback`, `beta_votes` (unique on `(feedback_id, user_id)`), `beta_emails`. There are no migrations — schema changes are applied by editing this file and re-running it (the seed inserts use `ON DUPLICATE KEY UPDATE` so re-runs are safe).
+### Schema and migrations
 
-Note: [public/admin/dashboard.php:143](public/admin/dashboard.php#L143) renders status badges for `paused` and `testing` values that the schema's `ENUM('open','in_progress','closed')` does not allow. Either the enum needs widening or the dashboard code is dead — verify before relying on either.
+Fresh installs run [sql/schema.sql](sql/schema.sql) — tables: `admin_users`, `settings` (key/value), `app_features`, `screenshots`, `beta_users`, `beta_feedback`, `beta_votes` (unique on `(feedback_id, user_id)`), `beta_emails`, `login_attempts`, `schema_migrations`. Re-runnable thanks to `IF NOT EXISTS` / `ON DUPLICATE KEY UPDATE`.
+
+**Incremental schema changes** live in [sql/migrations/](sql/migrations/) as `NNN_description.sql` files and are applied via the admin UI at `/admin/settings/migrations.php`. The runner ([includes/Migrations.php](includes/Migrations.php)) splits on `;` (with comment-stripping), runs each statement, and records the filename in `schema_migrations` only on full success. There's a "Mark applied" escape hatch for files that were already run via the mysql CLI before the runner existed. **DDL is not transactional in MySQL** — partial failure leaves a half-applied schema; the file is *not* marked applied so you'll be prompted to retry.
+
+When adding a migration: also keep [tests/fixtures/sqlite_schema.sql](tests/fixtures/sqlite_schema.sql) in sync. `tests/Unit/SchemaDriftTest.php` will catch column-name divergence on `composer test`, but column-type changes (e.g. ENUM widening) are not caught — manual sync required.
 
 ## Conventions worth knowing
 
-- **HTML escape everything user-derived** with `e($string)`. The `setting()` helper returns raw DB values, so escape on output too.
-- **CSRF is not implemented.** Form posts rely on session auth alone. Don't add admin actions that mutate state via GET.
-- **Uploads** go to [public/uploads/](public/uploads/) with the URL prefix `UPLOAD_URL` (= `SITE_URL . '/uploads/'`); `MAX_IMAGE_SIZE` = 10 MB.
+- **HTML escape everything user-derived** with `e($string)`. The `setting()` helper returns raw DB values, so escape on output too. The same applies to `app_features.icon`, even though the schema looks like it'd only hold emoji.
+- **CSRF**: every state-changing form must include `<?= csrf_field() ?>`, and every POST handler must call `verify_csrf()` (or `verify_csrf(true)` for JSON endpoints, which return a 403 JSON body instead of HTML). Token lives in `$_SESSION['csrf_token']` and persists across the whole session. Login forms intentionally include CSRF too. Logout is POST-only.
+- **Settings writes are allowlisted**. [public/admin/settings/index.php](public/admin/settings/index.php) only accepts keys defined in the `$settingFields` map. Adding a new editable setting means adding it there *and* nowhere else accepts it implicitly.
+- **Uploads** go to [public/uploads/](public/uploads/) with the URL prefix `UPLOAD_URL` (= `SITE_URL . '/uploads/'`); `MAX_IMAGE_SIZE` = 10 MB. The directory has a `.htaccess` that blocks PHP execution as defence-in-depth — keep it tracked (the project `.gitignore` already handles this).
 - **No frontend tooling.** [public/css/style.css](public/css/style.css), [public/admin/css/admin.css](public/admin/css/admin.css), [public/beta/css/beta.css](public/beta/css/beta.css) are hand-written. JS in [public/js/main.js](public/js/main.js) and [public/beta/js/beta.js](public/beta/js/beta.js) is vanilla, no bundler.
 - **Flash messages** are one-shot session entries: write with `flash('success', 'Saved.')`, read+consume with `getFlash()`. Always pair a write with a redirect, otherwise the flash sits in the session until the next page load.
-- **`.env` is gitignored**, but so is `.htaccess` — be careful not to lose `.htaccess` changes to git when working locally.
+- **`.env` is gitignored**; root `.htaccess` is gitignored (`/.htaccess`) but nested ones like `public/uploads/.htaccess` are tracked.

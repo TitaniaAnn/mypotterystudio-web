@@ -33,9 +33,10 @@ $settingFields = [
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
+    $allowedKeys = array_keys(array_merge(...array_values($settingFields)));
     foreach ($_POST['settings'] ?? [] as $key => $value) {
-        $key   = preg_replace('/[^a-z0-9_]/', '', $key);
-        $value = trim($value);
+        if (!in_array($key, $allowedKeys, true)) continue;
+        $value = is_string($value) ? trim($value) : '';
         Database::execute(
             "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
              ON DUPLICATE KEY UPDATE setting_value = ?",

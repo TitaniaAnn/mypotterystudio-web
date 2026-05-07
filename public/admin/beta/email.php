@@ -2,6 +2,9 @@
 require_once __DIR__ . '/../../../includes/bootstrap.php';
 Auth::requireLogin();
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception as MailException;
+
 $pageTitle = 'Send Email';
 $message   = '';
 $msgType   = 'success';
@@ -15,40 +18,91 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$subject || !$body) {
         $message = 'Subject and body are required.';
         $msgType = 'error';
+    } elseif (!MAIL_HOST || !MAIL_USER || !MAIL_FROM) {
+        $message = 'Email is not configured. Set MAIL_HOST / MAIL_USER / MAIL_FROM in .env first.';
+        $msgType = 'error';
     } else {
-        // Count recipients
         if ($platform === 'all') {
             $recipients = Database::fetchAll("SELECT email, name FROM beta_users WHERE approved = 1");
         } else {
-            $recipients = Database::fetchAll("SELECT email, name FROM beta_users WHERE approved = 1 AND platform = ?", [$platform]);
+            $recipients = Database::fetchAll(
+                "SELECT email, name FROM beta_users WHERE approved = 1 AND platform = ?",
+                [$platform]
+            );
         }
 
-        // Record the email send attempt
+        $sent     = 0;
+        $failed   = 0;
+        $firstErr = null;
+
+        if ($recipients) {
+            // One PHPMailer instance, kept alive across the loop so we don't
+            // reconnect to SMTP for every recipient. Each addAddress is
+            // cleared between sends so testers only see their own address.
+            $mail = new PHPMailer(true);
+            try {
+                $mail->isSMTP();
+                $mail->Host          = MAIL_HOST;
+                $mail->Port          = MAIL_PORT;
+                $mail->SMTPAuth      = true;
+                $mail->Username      = MAIL_USER;
+                $mail->Password      = MAIL_PASS;
+                if (MAIL_ENCRYPTION === 'tls') {
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                } elseif (MAIL_ENCRYPTION === 'ssl') {
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                }
+                $mail->SMTPKeepAlive = true;
+                $mail->CharSet       = 'UTF-8';
+                $mail->setFrom(MAIL_FROM, MAIL_FROM_NAME);
+                if (MAIL_REPLY_TO) {
+                    $mail->addReplyTo(MAIL_REPLY_TO);
+                }
+                $mail->isHTML(false);
+                $mail->Subject = $subject;
+                $mail->Body    = $body;
+
+                foreach ($recipients as $r) {
+                    try {
+                        $mail->clearAddresses();
+                        $mail->addAddress($r['email'], $r['name']);
+                        $mail->send();
+                        $sent++;
+                    } catch (MailException $e) {
+                        $failed++;
+                        if ($firstErr === null) $firstErr = $e->getMessage();
+                        error_log("Email to {$r['email']} failed: " . $e->getMessage());
+                    }
+                }
+            } catch (MailException $e) {
+                // SMTP setup itself failed — every remaining recipient counts as failed.
+                $failed   = count($recipients) - $sent;
+                $firstErr = $e->getMessage();
+                error_log("Email batch setup failed: " . $e->getMessage());
+            } finally {
+                try { $mail->smtpClose(); } catch (\Throwable $e) { /* ignore */ }
+            }
+        }
+
         Database::insert('beta_emails', [
             'subject' => $subject,
             'body'    => $body,
-            'sent_to' => count($recipients),
+            'sent_to' => $sent,
         ]);
 
-        // TODO: Implement actual email sending via PHPMailer
-        // Example integration:
-        // foreach ($recipients as $recipient) {
-        //     $mail = new PHPMailer\PHPMailer\PHPMailer();
-        //     $mail->isSMTP();
-        //     $mail->Host       = MAIL_HOST;
-        //     $mail->SMTPAuth   = true;
-        //     $mail->Username   = MAIL_USER;
-        //     $mail->Password   = MAIL_PASS;
-        //     $mail->Port       = MAIL_PORT;
-        //     $mail->setFrom(MAIL_FROM, MAIL_FROM_NAME);
-        //     $mail->addAddress($recipient['email'], $recipient['name']);
-        //     $mail->Subject    = $subject;
-        //     $mail->Body       = $body;
-        //     $mail->send();
-        // }
-
-        $message = 'Email recorded for ' . count($recipients) . ' recipient(s). Note: Actual sending requires PHPMailer configuration — see code comments.';
-        $msgType = 'success';
+        if ($failed === 0 && $sent > 0) {
+            $message = "Sent to $sent recipient(s).";
+            $msgType = 'success';
+        } elseif ($sent > 0) {
+            $message = "Sent to $sent recipient(s); $failed failed. First error: " . $firstErr;
+            $msgType = 'error';
+        } elseif ($recipients) {
+            $message = "All $failed send(s) failed. Check the PHP error log. First error: " . $firstErr;
+            $msgType = 'error';
+        } else {
+            $message = 'No recipients matched the selected filter.';
+            $msgType = 'error';
+        }
     }
 }
 
@@ -88,9 +142,11 @@ $totalApproved = (int)(Database::fetchOne("SELECT COUNT(*) as c FROM beta_users 
             <div class="admin-section">
                 <h2 class="admin-section__title">Compose Email</h2>
                 <div class="admin-card">
+                    <?php if (!MAIL_HOST || MAIL_HOST === 'smtp.example.com'): ?>
                     <div class="admin-info-note">
-                        ℹ️ Emails are logged in the database. Actual sending requires configuring SMTP settings in your <code>.env</code> file and uncommenting the PHPMailer code in this file.
+                        ⚠️ <strong>SMTP is not configured.</strong> Set <code>MAIL_HOST</code>, <code>MAIL_USER</code>, <code>MAIL_PASS</code>, and <code>MAIL_FROM</code> in your <code>.env</code> file.
                     </div>
+                    <?php endif; ?>
                     <form method="POST" class="admin-form">
                         <?= csrf_field() ?>
                         <div class="admin-form__group">

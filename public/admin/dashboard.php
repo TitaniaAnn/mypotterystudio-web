@@ -15,7 +15,7 @@ $newFeedback   = (int)(Database::fetchOne("SELECT COUNT(*) as c FROM beta_feedba
 $recentFeedback = Database::fetchAll(
     "SELECT bf.*, bu.name as submitter_name
      FROM beta_feedback bf
-     JOIN beta_users bu ON bf.user_id = bu.id
+     LEFT JOIN beta_users bu ON bf.user_id = bu.id
      ORDER BY bf.created_at DESC
      LIMIT 10"
 );
@@ -144,7 +144,7 @@ $flash = getFlash();
                                     <?= e(ucfirst(str_replace('_',' ',$item['status']))) ?>
                                 </span>
                             </td>
-                            <td><?= e($item['submitter_name']) ?></td>
+                            <td><?= $item['submitter_name'] !== null ? e($item['submitter_name']) : '<em>Deleted</em>' ?></td>
                             <td><?= (int)$item['votes'] ?></td>
                             <td><?= date('M j, Y', strtotime($item['created_at'])) ?></td>
                         </tr>

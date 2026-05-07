@@ -79,9 +79,13 @@ function adminNavActive(string $path): string {
             </div>
         </div>
         <?php endif; ?>
-        <a href="/admin/logout.php" class="admin-nav__item admin-nav__item--logout">
-            <span class="admin-nav__icon">→</span>
-            Sign Out
-        </a>
+        <form method="POST" action="/admin/logout.php" class="admin-nav__logout-form" style="margin:0;">
+            <?= csrf_field() ?>
+            <button type="submit" class="admin-nav__item admin-nav__item--logout"
+                    style="background:none;border:none;width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit;">
+                <span class="admin-nav__icon">→</span>
+                Sign Out
+            </button>
+        </form>
     </div>
 </aside>

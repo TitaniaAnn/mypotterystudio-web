@@ -6,7 +6,7 @@ $id   = (int)($_GET['id'] ?? 0);
 $item = $id ? Database::fetchOne(
     "SELECT bf.*, bu.name as submitter_name, bu.email as submitter_email
      FROM beta_feedback bf
-     JOIN beta_users bu ON bf.user_id = bu.id
+     LEFT JOIN beta_users bu ON bf.user_id = bu.id
      WHERE bf.id = ?",
     [$id]
 ) : null;
@@ -84,8 +84,12 @@ $pageTitle = 'Feedback: ' . $item['title'];
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
                     <div>
                         <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--admin-text-lt);margin-bottom:4px;">Submitted by</div>
+                        <?php if ($item['submitter_name'] !== null): ?>
                         <div style="font-size:14px;"><?= e($item['submitter_name']) ?></div>
                         <div style="font-size:12px;color:var(--admin-text-lt);"><?= e($item['submitter_email']) ?></div>
+                        <?php else: ?>
+                        <div style="font-size:14px;font-style:italic;color:var(--admin-text-lt);">Deleted tester</div>
+                        <?php endif; ?>
                     </div>
                     <?php if ($item['github_issue_url']): ?>
                     <div>

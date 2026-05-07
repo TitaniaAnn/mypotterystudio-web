@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS beta_users (
 
 CREATE TABLE IF NOT EXISTS beta_feedback (
     id                  INT AUTO_INCREMENT PRIMARY KEY,
-    user_id             INT NOT NULL,
+    user_id             INT NULL,
     type                ENUM('bug','feature') NOT NULL,
     title               VARCHAR(255) NOT NULL,
     body                TEXT NOT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS beta_feedback (
     status              ENUM('open','in_progress','paused','testing','closed') DEFAULT 'open',
     votes               INT DEFAULT 0,
     created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES beta_users(id) ON DELETE CASCADE
+    CONSTRAINT fk_beta_feedback_user FOREIGN KEY (user_id) REFERENCES beta_users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS beta_votes (

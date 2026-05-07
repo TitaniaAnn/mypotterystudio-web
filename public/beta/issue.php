@@ -8,7 +8,7 @@ $item = $id ? Database::fetchOne(
     "SELECT bf.*, bu.name as submitter_name,
         (SELECT 1 FROM beta_votes bv WHERE bv.feedback_id = bf.id AND bv.user_id = ?) as user_voted
      FROM beta_feedback bf
-     JOIN beta_users bu ON bf.user_id = bu.id
+     LEFT JOIN beta_users bu ON bf.user_id = bu.id
      WHERE bf.id = ?",
     [$user['id'], $id]
 ) : null;
@@ -65,10 +65,14 @@ if (!$item) {
                 <span class="beta-sidebar__user-email"><?= e($user['email']) ?></span>
             </div>
         </div>
-        <a href="/beta/logout.php" class="beta-nav__item beta-nav__item--logout">
-            <span class="beta-nav__icon">→</span>
-            Sign Out
-        </a>
+        <form method="POST" action="/beta/logout.php" style="margin:0;">
+            <?= csrf_field() ?>
+            <button type="submit" class="beta-nav__item beta-nav__item--logout"
+                    style="background:none;border:none;width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit;">
+                <span class="beta-nav__icon">→</span>
+                Sign Out
+            </button>
+        </form>
     </div>
 </aside>
 
@@ -102,7 +106,7 @@ if (!$item) {
                             data-vote="<?= (int)$item['id'] ?>">
                         ▲ <span class="vote-count" data-vote-count><?= (int)$item['votes'] ?></span>
                     </button>
-                    <span class="beta-feedback-item__author">by <?= e($item['submitter_name']) ?></span>
+                    <span class="beta-feedback-item__author">by <?= $item['submitter_name'] !== null ? e($item['submitter_name']) : '<em>a deleted tester</em>' ?></span>
                     <?php if ($item['github_issue_url']): ?>
                     <a href="<?= e($item['github_issue_url']) ?>" target="_blank" class="beta-link beta-link--sm">View on GitHub</a>
                     <?php endif; ?>

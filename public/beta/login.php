@@ -7,6 +7,7 @@ if (BetaAuth::isLoggedIn()) {
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     $email    = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $ip       = $_SERVER['REMOTE_ADDR'] ?? null;
@@ -55,6 +56,7 @@ $flash = getFlash();
         <?php endif; ?>
 
         <form method="POST" class="beta-form">
+            <?= csrf_field() ?>
             <div class="beta-form__group">
                 <label class="beta-form__label" for="email">Email Address</label>
                 <input class="beta-form__input" type="email" id="email" name="email"

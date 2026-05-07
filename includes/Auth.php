@@ -116,14 +116,24 @@ class Auth {
     private static function httpPost(string $url, array $data, array $extraHeaders = []): array {
         $ch = curl_init($url);
         curl_setopt_array($ch, [
-            CURLOPT_POST => true, CURLOPT_POSTFIELDS => http_build_query($data),
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => http_build_query($data),
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => array_merge(
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_HTTPHEADER     => array_merge(
                 ['Content-Type: application/x-www-form-urlencoded', 'User-Agent: MyPotteryStudio/1.0'],
                 $extraHeaders
             ),
         ]);
-        $response = curl_exec($ch); curl_close($ch);
+        $response = curl_exec($ch);
+        $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err      = $response === false ? curl_error($ch) : null;
+        curl_close($ch);
+        if ($response === false || $status < 200 || $status >= 300) {
+            error_log("Auth::httpPost $url failed: status=$status err=" . ($err ?? 'n/a'));
+            return [];
+        }
         return json_decode($response, true) ?? [];
     }
 
@@ -131,11 +141,20 @@ class Auth {
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => [
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_HTTPHEADER     => [
                 "Authorization: Bearer $token", 'User-Agent: MyPotteryStudio/1.0', 'Accept: application/json',
             ],
         ]);
-        $response = curl_exec($ch); curl_close($ch);
+        $response = curl_exec($ch);
+        $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err      = $response === false ? curl_error($ch) : null;
+        curl_close($ch);
+        if ($response === false || $status < 200 || $status >= 300) {
+            error_log("Auth::httpGet $url failed: status=$status err=" . ($err ?? 'n/a'));
+            return [];
+        }
         return json_decode($response, true) ?? [];
     }
 }

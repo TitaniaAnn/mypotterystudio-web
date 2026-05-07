@@ -88,9 +88,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span class="beta-sidebar__user-name"><?= e($user['name']) ?></span>
             </div>
         </div>
-        <a href="/beta/logout.php" class="beta-nav__item beta-nav__item--logout">
-            <span class="beta-nav__icon">→</span> Sign Out
-        </a>
+        <form method="POST" action="/beta/logout.php" style="margin:0;">
+            <?= csrf_field() ?>
+            <button type="submit" class="beta-nav__item beta-nav__item--logout"
+                    style="background:none;border:none;width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit;">
+                <span class="beta-nav__icon">→</span> Sign Out
+            </button>
+        </form>
     </div>
 </aside>
 

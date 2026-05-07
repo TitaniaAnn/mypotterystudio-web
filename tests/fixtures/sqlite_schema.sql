@@ -52,7 +52,7 @@ CREATE TABLE beta_users (
 
 CREATE TABLE beta_feedback (
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id             INTEGER NOT NULL,
+    user_id             INTEGER,
     type                TEXT NOT NULL,
     title               TEXT NOT NULL,
     body                TEXT NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE beta_feedback (
     status              TEXT DEFAULT 'open',
     votes               INTEGER DEFAULT 0,
     created_at          TEXT DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES beta_users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES beta_users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE beta_votes (

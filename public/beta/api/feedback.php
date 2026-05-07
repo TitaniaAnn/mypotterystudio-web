@@ -10,7 +10,7 @@ $feedback = Database::fetchAll(
     "SELECT bf.*, bu.name as submitter_name,
         (SELECT 1 FROM beta_votes bv WHERE bv.feedback_id = bf.id AND bv.user_id = ?) as user_voted
      FROM beta_feedback bf
-     JOIN beta_users bu ON bf.user_id = bu.id
+     LEFT JOIN beta_users bu ON bf.user_id = bu.id
      ORDER BY bf.votes DESC, bf.created_at DESC",
     [$user['id']]
 );

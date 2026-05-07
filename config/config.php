@@ -22,3 +22,13 @@ define('BETA_DOWNLOAD_ANDROID', $_ENV['BETA_DOWNLOAD_ANDROID'] ?? getenv('BETA_D
 define('SESSION_NAME',     'mps_session');
 define('SESSION_LIFETIME', 86400 * 7);
 define('MAX_IMAGE_SIZE',   10 * 1024 * 1024);
+
+define('MAIL_HOST',       $_ENV['MAIL_HOST']       ?? '');
+define('MAIL_PORT',       (int)($_ENV['MAIL_PORT'] ?? 587));
+define('MAIL_USER',       $_ENV['MAIL_USER']       ?? '');
+define('MAIL_PASS',       $_ENV['MAIL_PASS']       ?? '');
+define('MAIL_FROM',       $_ENV['MAIL_FROM']       ?? '');
+define('MAIL_FROM_NAME',  $_ENV['MAIL_FROM_NAME']  ?? 'My Pottery Studio');
+// 'tls' (STARTTLS, port 587) | 'ssl' (TLS-on-connect, port 465) | '' (none)
+define('MAIL_ENCRYPTION', strtolower($_ENV['MAIL_ENCRYPTION'] ?? 'tls'));
+define('MAIL_REPLY_TO',   $_ENV['MAIL_REPLY_TO']   ?? '');

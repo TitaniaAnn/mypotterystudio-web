@@ -49,3 +49,17 @@ Avoids a hard dependency on a running MySQL instance for unit tests.
 Trade-off: the test schema can't validate MySQL-specific behaviour like
 ENUM truncation. The migration in `sql/migrations/001_widen_feedback_status.sql`
 exists precisely because of one of those traps.
+
+## Known gaps
+
+- **`tests/Integration/VoteTest.php` reimplements the vote handler.** The
+  test contains its own copy of the toggle logic from
+  `public/beta/api/vote.php`, with `INSERT OR IGNORE` (SQLite) instead of
+  `INSERT IGNORE` (MySQL). It validates the algorithm but won't catch a
+  regression where someone changes `vote.php` and forgets to update the
+  test. Fixing this needs either a real MySQL test DB or extracting the
+  toggle into a Pure-PHP function the handler calls.
+- **`SchemaDriftTest` only compares column names**, not types or
+  constraints. ENUM widening (e.g. `001_widen_feedback_status.sql`)
+  won't be caught by this test alone — keep the fixture and the
+  migration both in sync manually for type-level changes.

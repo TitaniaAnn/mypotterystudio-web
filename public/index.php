@@ -124,7 +124,7 @@ $screenshots = Database::fetchAll("SELECT * FROM screenshots WHERE active = 1 OR
         <div class="features-grid">
             <?php foreach ($features as $feature): ?>
             <div class="feature-card">
-                <div class="feature-card__icon"><?= $feature['icon'] ?></div>
+                <div class="feature-card__icon"><?= e($feature['icon']) ?></div>
                 <h3 class="feature-card__title"><?= e($feature['title']) ?></h3>
                 <p class="feature-card__desc"><?= e($feature['description']) ?></p>
             </div>

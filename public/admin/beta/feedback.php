@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $typeFilter   = in_array($_GET['type'] ?? '', ['bug','feature']) ? $_GET['type'] : '';
 $statusFilter = in_array($_GET['status'] ?? '', ['open','in_progress','paused','testing','closed']) ? $_GET['status'] : '';
 
-$sql    = "SELECT bf.*, bu.name as submitter_name FROM beta_feedback bf JOIN beta_users bu ON bf.user_id = bu.id WHERE 1=1";
+$sql    = "SELECT bf.*, bu.name as submitter_name FROM beta_feedback bf LEFT JOIN beta_users bu ON bf.user_id = bu.id WHERE 1=1";
 $params = [];
 if ($typeFilter)   { $sql .= " AND bf.type = ?";   $params[] = $typeFilter; }
 if ($statusFilter) { $sql .= " AND bf.status = ?"; $params[] = $statusFilter; }
@@ -120,7 +120,7 @@ $items = Database::fetchAll($sql, $params);
                                     <?= e(ucfirst(str_replace('_',' ',$item['status']))) ?>
                                 </span>
                             </td>
-                            <td><?= e($item['submitter_name']) ?></td>
+                            <td><?= $item['submitter_name'] !== null ? e($item['submitter_name']) : '<em class="admin-text-muted">Deleted tester</em>' ?></td>
                             <td><?= (int)$item['votes'] ?></td>
                             <td>
                                 <?php if ($item['github_issue_url']): ?>
